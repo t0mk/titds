@@ -9,6 +9,7 @@ import argparse
 import re
 import requests
 import datetime
+import tzlocal
 import json
 
 TOKEN_URL = 'https://www.toggl.com/app/profile'
@@ -88,11 +89,11 @@ def req(url, params, method):
 
 @argh.aliases('l')
 def time_entries():
-    week_ago = datetime.datetime.now() - datetime.timedelta(days=7)
+    week_ago = datetime.datetime.now(tz=tzlocal.get_localzone()).replace(microsecond=0) - datetime.timedelta(days=7)
     params = {}
     params = {
         'start_date': week_ago.isoformat(),
-        'end_date': datetime.datetime.now().isoformat()
+        'end_date': datetime.datetime.now(tz=tzlocal.get_localzone()).replace(microsecond=0).isoformat()
     }
 
     print(req('time_entries', params, 'GET'))
@@ -102,7 +103,7 @@ if __name__ == "__main__":
     parser = argh.ArghParser()
 
     exposed = [time_entries]
-    #argh.assembling.set_default_command(parser, do.droplets)
+    argh.assembling.set_default_command(parser, time_entries)
 
     parser.add_commands(exposed)
     parser.add_argument('-d', '--debug', const=False, action=MyAction)
